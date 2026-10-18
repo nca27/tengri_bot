@@ -19,9 +19,19 @@ import requests
 from bs4 import BeautifulSoup
 
 CHANNEL = os.getenv("CHANNEL", "tengri_kz")
-TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
-CHAT_ID = os.environ["CHAT_ID"]
-GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
+def _secret(name):
+    value = os.getenv(name, "").strip()
+    if not value:
+        sys.exit(f"ОШИБКА: секрет {name} пустой или не найден. Проверьте Settings → "
+                 f"Secrets and variables → Actions → вкладка Secrets → Repository secrets.")
+    return value
+
+
+TELEGRAM_TOKEN = _secret("TELEGRAM_TOKEN")
+if TELEGRAM_TOKEN.lower().startswith("bot"):
+    TELEGRAM_TOKEN = TELEGRAM_TOKEN[3:]
+CHAT_ID = _secret("CHAT_ID")
+GEMINI_API_KEY = _secret("GEMINI_API_KEY")
 # первая модель основная; если у неё кончился бесплатный лимит — пробуем следующую
 GEMINI_MODELS = [m.strip() for m in
                  os.getenv("GEMINI_MODELS", "gemini-3.8-flash,gemini-3.5-flash-lite").split(",")
